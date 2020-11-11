@@ -2,7 +2,8 @@ export default [
   { exact: true, path: '/', redirect: '/user/login' },
   {
     layout: false,
-    name: 'login',
+    menuRender: false,
+    // name: 'login',
     path: '/user/login',
     component: '@/pages/user/login',
   },

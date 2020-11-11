@@ -1,10 +1,16 @@
-import React from 'react'
-import './index.less'
-import LoginForm from './LoginForm'
+import React from 'react';
+import { Helmet } from 'umi';
+import './index.less';
+import LoginForm from './LoginForm';
 
 const Login = () => {
   return (
     <div className="container">
+      <Helmet>
+        <meta charSet="utf-8" />
+        <title>花 π 电商管理平台</title>
+        <link rel="canonical" href="http://mysite.com/example" />
+      </Helmet>
       <div className="login">
         <div className="title">花 π 电商管理平台</div>
         <div className="content">
@@ -12,7 +18,7 @@ const Login = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
