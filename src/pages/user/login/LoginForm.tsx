@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Form, Input, Button } from 'antd';
-import { useCountDown } from 'ahooks';
+import { useCountDown,  } from 'ahooks';
+import { useRequest } from 'umi'
 import './index.less';
+import { fakeAccountLogin, LoginParamsType } from '@/services/login';
 
 const LoginForm: React.FC<{}> = () => {
   let timer: any = null;
@@ -10,8 +12,20 @@ const LoginForm: React.FC<{}> = () => {
   const [second, setTargetDate] = useCountDown();
   const [form] = Form.useForm();
 
-  const onFinish = (values: any) => {
-    console.log('Success:', values);
+  const { data, loading, run } = useRequest(
+    values => ({
+      url: '/api/account/login',
+      method: 'post',
+      data:values,
+    }),
+    {
+      manual: true,
+    },
+  );
+
+  const onFinish = async (values: LoginParamsType) => {
+    await run(values)
+    console.log(data); 
   };
 
   const changeTabs = (e: string) => {
@@ -46,7 +60,7 @@ const LoginForm: React.FC<{}> = () => {
         {type === 'account' && (
           <>
             <Form.Item
-              name="account"
+              name="username"
               // label="账号"
               rules={[{ required: true, message: '请填写账号信息！' }]}
             >
@@ -95,7 +109,7 @@ const LoginForm: React.FC<{}> = () => {
         {type !== 'QRCode' && (
           <>
             <Form.Item>
-              <Button type="primary" size="large" block htmlType="submit">
+              <Button type="primary" size="large" block htmlType="submit" loading={loading}>
                 登录
               </Button>
             </Form.Item>
