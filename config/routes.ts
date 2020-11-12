@@ -3,8 +3,14 @@ export default [
   {
     layout: false,
     menuRender: false,
-    // name: 'login',
     path: '/user/login',
     component: '@/pages/user/login',
+  },
+  {
+    path: '/index',
+    component: '@/pages/index',
+  },
+  {
+    component: './404',
   },
 ];

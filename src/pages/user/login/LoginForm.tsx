@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, Form, Input, Button } from 'antd';
-import { useCountDown,  } from 'ahooks';
-import { useRequest } from 'umi'
+import { Tabs, Form, Input, Button, message } from 'antd';
+import { useCountDown } from 'ahooks';
+import { useRequest } from 'umi';
 import './index.less';
 import { fakeAccountLogin, LoginParamsType } from '@/services/login';
+import { setToken } from '@/utils/utils';
 
 const LoginForm: React.FC<{}> = () => {
   let timer: any = null;
@@ -16,7 +17,7 @@ const LoginForm: React.FC<{}> = () => {
     values => ({
       url: '/api/account/login',
       method: 'post',
-      data:values,
+      data: values,
     }),
     {
       manual: true,
@@ -24,8 +25,13 @@ const LoginForm: React.FC<{}> = () => {
   );
 
   const onFinish = async (values: LoginParamsType) => {
-    await run(values)
-    console.log(data); 
+    await run(values);
+    console.log(data);
+    if (data && data.token) {
+      setToken(data.token);
+      message.success('登录成功');
+      window.location.href = '/index';
+    }
   };
 
   const changeTabs = (e: string) => {
@@ -109,7 +115,13 @@ const LoginForm: React.FC<{}> = () => {
         {type !== 'QRCode' && (
           <>
             <Form.Item>
-              <Button type="primary" size="large" block htmlType="submit" loading={loading}>
+              <Button
+                type="primary"
+                size="large"
+                block
+                htmlType="submit"
+                loading={loading}
+              >
                 登录
               </Button>
             </Form.Item>
