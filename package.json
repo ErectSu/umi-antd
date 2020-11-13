@@ -26,11 +26,12 @@
     }
   },
   "dependencies": {
-    "@ant-design/pro-layout": "^6.4.19",
+    "@ant-design/pro-layout": "^6.5.14",
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.2.26",
     "ahooks": "^2.9.1",
     "antd": "^4.8.2",
+    "classnames": "^2.2.6",
     "lint-staged": "^10.0.7",
     "prettier": "^1.19.1",
     "react": "^16.12.0",
@@ -39,6 +40,7 @@
     "yorkie": "^2.0.0"
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.11",
     "commitizen": "^4.2.2",
     "cz-conventional-changelog": "^3.3.0"
   }

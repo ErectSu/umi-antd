@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   ResponseError,
   RequestInterceptor,
@@ -5,8 +6,16 @@ import {
   RequestOptionsInit,
 } from 'umi-request';
 import { notification } from 'antd';
-import { RequestConfig } from 'umi';
+import { history, RequestConfig } from 'umi';
+import {
+  BasicLayoutProps,
+  Settings as LayoutSettings,
+  PageLoading,
+} from '@ant-design/pro-layout';
+import RightContent from '@/components/RightContent';
+import defaultSettings from '../config/defaultSettings';
 import { getToken } from '@/utils/utils';
+import { queryCurrent } from '@/services/user';
 
 const token = getToken();
 
@@ -19,20 +28,54 @@ const headers = {
   'Content-Type': 'application/json;charset=UTF-8',
 };
 
-export const layout = {
-  // do something
-  logout: () => {},
-  // https://procomponents.ant.design/components/layout
-  // rightRender: (e:any) => {
-  //   return 'ssss';
-  // }, // return string || ReactNode;
+export const layout = ({
+  initialState,
+}: {
+  initialState: { settings?: LayoutSettings; currentUser?: API.CurrentUser };
+}): BasicLayoutProps => {
+  return {
+    rightContentRender: () => <RightContent />,
+    disableContentMargin: false,
+    // footerRender: () => <Footer />,
+    onPageChange: () => {
+      const { currentUser } = initialState;
+      const { location } = history;
+      // 如果没有登录，重定向到 login
+      if (!currentUser && location.pathname !== '/user/login') {
+        history.push('/user/login');
+      }
+    },
+    menuHeaderRender: undefined,
+    ...initialState?.settings,
+  };
 };
 
-export function getInitialState() {
+export async function getInitialState(): Promise<{
+  settings?: LayoutSettings;
+  currentUser?: API.CurrentUser;
+  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+}> {
+  const fetchUserInfo = async () => {
+    try {
+      const currentUser = await queryCurrent();
+      return currentUser?.data;
+    } catch (error) {
+      history.push('/user/login');
+    }
+    return undefined;
+  };
+  // 如果是登录页面，不执行
+  if (history.location.pathname !== '/user/login') {
+    const currentUser = await fetchUserInfo();
+    return {
+      fetchUserInfo,
+      currentUser,
+      settings: defaultSettings,
+    };
+  }
   return {
-    name: 'Serati Ma',
-    avatar:
-      'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+    fetchUserInfo,
+    settings: defaultSettings,
   };
 }
 
@@ -94,6 +137,7 @@ const requestInterceptor: RequestInterceptor = (
         ...options,
         data: JSON.stringify(options.data),
         headers: {
+          ...headers,
           Authorization: `Bearer ${token}`,
         },
       },
@@ -115,17 +159,15 @@ const requestInterceptor: RequestInterceptor = (
  * 响应拦截器
  */
 const responseInterceptor: ResponseInterceptor = async (response: Response) => {
-  const data = await response.clone().json();
-  if (response.status === 200 && data.code === 0) {
+  const res = await response.clone().json();
+  if (response.status === 200 && res.code === 0) {
     notification.error({
-      message: data.data,
-      description: data.msg,
+      message: res.data,
+      description: res.msg,
     });
-    console.log('22222');
-    
-    return {} as Response
+    return {};
   }
-  return data;
+  return res;
 };
 
 export const request: RequestConfig = {
