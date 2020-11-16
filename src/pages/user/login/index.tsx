@@ -1,3 +1,4 @@
+import Footer from '@/components/Footer';
 import React from 'react';
 import { Helmet } from 'umi';
 import './index.less';
@@ -17,6 +18,7 @@ const Login = () => {
           <LoginForm />
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -15,9 +15,10 @@ import {
 } from '@ant-design/pro-layout';
 import * as allIcons from '@ant-design/icons/es';
 import RightContent from '@/components/RightContent';
-import defaultSettings from '../config/defaultSettings';
+import Footer from '@/components/Footer';
 import { getToken } from '@/utils/utils';
 import { queryCurrent, queryMenu } from '@/services/user';
+import defaultSettings from '../config/defaultSettings';
 
 const token = getToken();
 
@@ -74,7 +75,7 @@ export const layout = ({
   return {
     rightContentRender: () => <RightContent />,
     disableContentMargin: false,
-    // footerRender: () => <Footer />,
+    footerRender: () => <Footer />,
     onPageChange: () => {
       const { currentUser } = initialState;
       const { location } = history;
