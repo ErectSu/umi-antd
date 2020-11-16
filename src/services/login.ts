@@ -14,3 +14,9 @@ export async function fakeAccountLogin(params: LoginParamsType) {
     data: params,
   });
 }
+
+export async function fakeAccountLogout() {
+  return request('/api/account/logout', {
+    method: 'POST',
+  });
+}

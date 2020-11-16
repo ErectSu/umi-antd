@@ -10,6 +10,8 @@ import { history, useModel } from 'umi';
 import { stringify } from 'querystring';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
+import { fakeAccountLogout } from '@/services/login';
+import { removeToken } from '@/utils/utils';
 
 export interface GlobalHeaderRightProps {
   menu?: boolean;
@@ -19,7 +21,8 @@ export interface GlobalHeaderRightProps {
  * 退出登录，并且将当前的 url 保存
  */
 const loginOut = async () => {
-  // await outLogin();
+  await fakeAccountLogout();
+  removeToken();
   const { query, pathname } = history.location;
   const { redirect } = query;
   // Note: There may be security issues, please note
@@ -70,7 +73,7 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
     return loading;
   }
 
-  const { currentUser } = initialState;
+  const { currentUser, menuData } = initialState;
 
   if (!currentUser || !currentUser.name) {
     return loading;
@@ -78,19 +81,19 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
 
   const menuHeaderDropdown = (
     <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
-      {menu && (
+      {menuData && (
         <Menu.Item key="center">
           <UserOutlined />
           个人中心
         </Menu.Item>
       )}
-      {menu && (
+      {menuData && (
         <Menu.Item key="settings">
           <SettingOutlined />
           个人设置
         </Menu.Item>
       )}
-      {menu && <Menu.Divider />}
+      {menuData && <Menu.Divider />}
 
       <Menu.Item key="logout">
         <LogoutOutlined />
