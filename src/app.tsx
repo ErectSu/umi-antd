@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   ResponseError,
   RequestInterceptor,
@@ -11,11 +11,13 @@ import {
   BasicLayoutProps,
   Settings as LayoutSettings,
   PageLoading,
+  MenuDataItem,
 } from '@ant-design/pro-layout';
+import * as allIcons from '@ant-design/icons/es';
 import RightContent from '@/components/RightContent';
 import defaultSettings from '../config/defaultSettings';
 import { getToken } from '@/utils/utils';
-import { queryCurrent } from '@/services/user';
+import { queryCurrent, queryMenu } from '@/services/user';
 
 const token = getToken();
 
@@ -23,15 +25,51 @@ export interface codeMessage {
   [key: number]: string;
 }
 
+export interface IconMap {
+  [key: string]: any;
+}
+
 const headers = {
   Accept: 'application/json',
   'Content-Type': 'application/json;charset=UTF-8',
 };
 
+// 菜单图标
+const formatter = (data: any[]) => {
+  data.forEach(item => {
+    if (typeof item.icon === 'string') {
+      const { icon } = item;
+      console.log(icon);
+
+      const v4IconName = icon.replace(icon[0], icon[0].toUpperCase());
+      const NewIcon = (allIcons as IconMap)[''.concat(v4IconName, 'Outlined')];
+      if (NewIcon) {
+        try {
+          // eslint-disable-next-line no-param-reassign
+          item.icon = React.createElement(NewIcon);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+
+    if (item.routes || item.children) {
+      const children = formatter(item.routes || item.children); // Reduce memory usage
+
+      item.children = children;
+    }
+  });
+  return data;
+};
+
 export const layout = ({
   initialState,
 }: {
-  initialState: { settings?: LayoutSettings; currentUser?: API.CurrentUser };
+  initialState: {
+    settings?: LayoutSettings;
+    currentUser?: API.CurrentUser;
+    menuData?: MenuDataItem[];
+  };
 }): BasicLayoutProps => {
   return {
     rightContentRender: () => <RightContent />,
@@ -46,6 +84,8 @@ export const layout = ({
       }
     },
     menuHeaderRender: undefined,
+    menuDataRender: (menuData: MenuDataItem[]) =>
+      formatter(initialState.menuData || menuData),
     ...initialState?.settings,
   };
 };
@@ -53,8 +93,11 @@ export const layout = ({
 export async function getInitialState(): Promise<{
   settings?: LayoutSettings;
   currentUser?: API.CurrentUser;
+  menuData?: MenuDataItem[];
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  fetchMenu?: () => Promise<MenuDataItem[] | undefined>;
 }> {
+  // 获取用户信息
   const fetchUserInfo = async () => {
     try {
       const currentUser = await queryCurrent();
@@ -64,17 +107,31 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
+  // 获取菜单信息
+  const fetchMenu = async () => {
+    try {
+      const menu = await queryMenu();
+      return menu?.data;
+    } catch (error) {
+      history.push('/user/login');
+    }
+    return undefined;
+  };
   // 如果是登录页面，不执行
   if (history.location.pathname !== '/user/login') {
     const currentUser = await fetchUserInfo();
+    const menuData = await fetchMenu();
     return {
       fetchUserInfo,
       currentUser,
+      menuData,
       settings: defaultSettings,
     };
   }
   return {
     fetchUserInfo,
+    fetchMenu,
+    menuData: [],
     settings: defaultSettings,
   };
 }
