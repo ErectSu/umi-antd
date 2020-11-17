@@ -11,6 +11,10 @@ export default [
     component: '@/pages/index',
   },
   {
+    path: '/shop',
+    component: '@/pages/shop',
+  },
+  {
     component: './404',
   },
 ];
